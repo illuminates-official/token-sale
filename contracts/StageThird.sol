@@ -5,7 +5,7 @@ import "./SafeMath.sol";
 import "./Ownable.sol";
 import "./ReentrancyGuard.sol";
 
-contract StageSecond is Ownable, ReentrancyGuard {
+contract StageThird is Ownable, ReentrancyGuard {
 
     using SafeMath for uint;
 
@@ -48,10 +48,10 @@ contract StageSecond is Ownable, ReentrancyGuard {
         receiver = msg.sender;
         deployTime = now;
 
-        totalCap = 450 ether;
+        totalCap = 3345 ether;
         currentCap = totalCap;
 
-        initTokens = 900000 * 10**18;
+        initTokens = 3345000 * 10**18;
         currentBalance = initTokens;
     }
 

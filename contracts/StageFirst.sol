@@ -10,7 +10,7 @@ contract StageFirst is Ownable, ReentrancyGuard {
     using SafeMath for uint;
 
     IERC20 public token;
-    address payable public reciever;
+    address payable public receiver;
 
     uint constant duration = 14 days;
     uint private deployTime;
@@ -45,7 +45,7 @@ contract StageFirst is Ownable, ReentrancyGuard {
     }
 
     constructor() public {
-        reciever = msg.sender;
+        receiver = msg.sender;
         deployTime = now;
 
         totalCap = 225 ether;
@@ -59,7 +59,7 @@ contract StageFirst is Ownable, ReentrancyGuard {
         invest();
     }
 
-    function invest() public payable nonReentrant inTime capNotReached {
+    function invest() private nonReentrant inTime capNotReached {
         require(msg.value > 0, "Value must be greater than 0");
         uint value;
         if(totalInvested + msg.value > totalCap) {
@@ -81,7 +81,7 @@ contract StageFirst is Ownable, ReentrancyGuard {
         require(currentBalance > 0, "Tokens out");
         if(totalInvested >= totalCap) {
             sendTokens();
-            recieveEther();
+            receiveEther();
         }
         else {
             returnTokens();
@@ -89,17 +89,18 @@ contract StageFirst is Ownable, ReentrancyGuard {
         }
     }
 
-    function recieveTokens() public nonReentrant {
-        require(investments[msg.sender] > 0, "Not invested");
-
-        uint amount = tokensAmount(investments[msg.sender]);
-        _transfer(msg.sender, amount);
-        currentBalance = currentBalance.sub(amount);
-
-        _sendEther(reciever, investments[msg.sender]);
-        currentInvested = currentInvested.sub(investments[msg.sender]);
-        currentCap = currentCap.sub(investments[msg.sender]);
+    function receiveTokens() public nonReentrant {
+        uint value = investments[msg.sender];
         investments[msg.sender] = 0;
+        require(value > 0, "Not invested");
+        uint amount = tokensAmount(value);
+
+        currentBalance = currentBalance.sub(amount);
+        currentInvested = currentInvested.sub(value);
+        currentCap = currentCap.sub(value);
+
+        _transfer(msg.sender, amount);
+        _sendEther(receiver, value);
 
         for (uint i = 0; i < investors.length; i++){
             if (investors[i] == msg.sender){
@@ -121,8 +122,8 @@ contract StageFirst is Ownable, ReentrancyGuard {
         _transfer(address(token), currentBalance);
     }
 
-    function recieveEther() private {
-        _sendEther(reciever, address(this).balance);
+    function receiveEther() private {
+        _sendEther(receiver, address(this).balance);
     }
 
     function returnEther() private {
@@ -131,8 +132,8 @@ contract StageFirst is Ownable, ReentrancyGuard {
         }
     }
 
-    function _sendEther(address payable _reciever, uint _value) private {
-        _reciever.transfer(_value);
+    function _sendEther(address payable _receiver, uint _value) private {
+        _receiver.transfer(_value);
     }
 
     function _transfer(address to, uint amount) private {
