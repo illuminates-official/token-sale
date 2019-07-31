@@ -3,9 +3,8 @@ pragma solidity ^0.5.10;
 import "./IERC20.sol";
 import "./SafeMath.sol";
 import "./Ownable.sol";
-import "./ReentrancyGuard.sol";
 
-contract StageSecond is Ownable, ReentrancyGuard {
+contract StageSecond is Ownable {
 
     using SafeMath for uint;
 
@@ -23,6 +22,9 @@ contract StageSecond is Ownable, ReentrancyGuard {
     uint private currentInvested;
     uint public totalCap;
     uint private currentCap;
+
+    event Investment(address indexed sender, uint indexed value);
+    event Receive(address indexed receiver, uint indexed amount);
 
     modifier capReached() {
         require(totalInvested == totalCap, "Cap not reached yet");
@@ -59,7 +61,7 @@ contract StageSecond is Ownable, ReentrancyGuard {
         invest();
     }
 
-    function invest() private nonReentrant inTime capNotReached {
+    function invest() private inTime capNotReached {
         require(msg.value > 0, "Value must be greater than 0");
         uint value;
         if(totalInvested + msg.value > totalCap) {
@@ -71,6 +73,8 @@ contract StageSecond is Ownable, ReentrancyGuard {
         investments[msg.sender] = investments[msg.sender].add(value);
         totalInvested = totalInvested.add(value);
         currentInvested = currentInvested.add(value);
+
+        emit Investment(msg.sender, value);
     }
 
     function setToken(address _token) public onlyOwner {
@@ -89,7 +93,7 @@ contract StageSecond is Ownable, ReentrancyGuard {
         }
     }
 
-    function receiveTokens() public nonReentrant {
+    function receiveTokens() public {
         uint value = investments[msg.sender];
         investments[msg.sender] = 0;
         require(value > 0, "Not invested");
@@ -99,13 +103,15 @@ contract StageSecond is Ownable, ReentrancyGuard {
         currentInvested = currentInvested.sub(value);
         currentCap = currentCap.sub(value);
 
-        _transfer(msg.sender, amount);
-        _sendEther(receiver, value);
-
         for (uint i = 0; i < investors.length; i++){
             if (investors[i] == msg.sender){
                 investors[i] = investors[investors.length - 1];
                 investors.pop();
+                _transfer(msg.sender, amount);
+                _sendEther(receiver, value);
+
+                emit Receive(msg.sender, amount);
+
                 return;
             }
         }
