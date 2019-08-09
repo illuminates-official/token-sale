@@ -85,11 +85,10 @@ contract('StageSecond', function (accounts) {
             assert.equal(+(await token.balanceOf(accounts[6])), vs(180000));
 
             await increaseTime(duration);
-            // await second.validate({from: investOwner});
 
             try {
                 await second.close({from: investOwner});
-                console.log("fail.\n Exception must be thrown before");
+                console.log("Fail!\n Exception must be thrown before");
             } catch (error) {assert(error.message.includes("Tokens out"));}
 
             assert.equal(+(await token.balanceOf(second.address)), 0);
