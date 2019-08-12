@@ -10,13 +10,13 @@ module.exports = {
   },
 
   mocha: {
-    reporter: 'eth-gas-reporter',
-    reporterOptions : {
-      currency: 'USD',
-      showTimeSpent: true,
-      excludeContracts: ['Migrations', 'Token'],
-      onlyCalledMethods: true
-     }
+    // reporter: 'eth-gas-reporter',
+    // reporterOptions : {
+    //   currency: 'USD',
+    //   showTimeSpent: true,
+    //   excludeContracts: ['Migrations', 'Token'],
+    //   onlyCalledMethods: true
+    //  }
   },
 
   compilers: {

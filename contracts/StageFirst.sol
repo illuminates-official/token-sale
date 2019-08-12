@@ -11,7 +11,8 @@ contract StageFirst is Ownable {
     IERC20 public token;
     address payable public receiver;
 
-    uint constant duration = 14 days;
+    uint constant firstDuration = 13 days;
+    uint constant secondDuration = 14 days;
     uint private deployTime;
     uint private initTokens;
     uint private currentBalance;
@@ -36,13 +37,18 @@ contract StageFirst is Ownable {
         _;
     }
 
+    modifier fundraisingTimeOut() {
+        require(now >= deployTime.add(firstDuration), "Investing are still ongoing");
+        _;
+    }
+
     modifier timeOut() {
-        require(now >= deployTime.add(duration), "Investing are still ongoing");
+        require(now >= deployTime.add(firstDuration.add(secondDuration)), "Investing are still ongoing");
         _;
     }
 
     modifier inTime() {
-        require(now < deployTime.add(duration), "Investing time is up");
+        require(now < deployTime.add(firstDuration.add(secondDuration)), "Investing time is up");
         _;
     }
 
@@ -81,41 +87,18 @@ contract StageFirst is Ownable {
         token = IERC20(_token);
     }
 
-    function close() public onlyOwner timeOut {
-        require(currentBalance > 0, "Tokens out");
-        if(totalInvested >= totalCap) {
+    function close() public onlyOwner fundraisingTimeOut {
+        if(totalInvested == totalCap) {
             sendTokens();
             receiveEther();
+        }
+        else if(now < deployTime.add(firstDuration.add(secondDuration))) {
+            revert("Investing are still ongoing");
         }
         else {
             returnTokens();
             returnEther();
         }
-    }
-
-    function receiveTokens() public {
-        uint value = investments[msg.sender];
-        investments[msg.sender] = 0;
-        require(value > 0, "Not invested");
-        uint amount = tokensAmount(value);
-
-        currentBalance = currentBalance.sub(amount);
-        currentInvested = currentInvested.sub(value);
-        currentCap = currentCap.sub(value);
-
-        for (uint i = 0; i < investors.length; i++){
-            if (investors[i] == msg.sender){
-                investors[i] = investors[investors.length - 1];
-                investors.pop();
-                _transfer(msg.sender, amount);
-                _sendEther(receiver, value);
-
-                emit Receive(msg.sender, amount);
-
-                return;
-            }
-        }
-        revert("Tokens already received");
     }
 
     function sendTokens() private {

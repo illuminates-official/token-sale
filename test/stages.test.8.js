@@ -162,7 +162,7 @@ contract('StageThird', function (accounts) {
 
             try {
                 await third.receiveTokens({from: accounts[2]});
-                console.log("fail.\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Not invested"));}
 
             await increaseTime(duration);

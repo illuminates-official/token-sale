@@ -68,13 +68,13 @@ contract('StageSecond', function (accounts) {
         it('setting token not by owner', async () => {
             try {
                 await second.setToken(team, {from: tokenOwner});
-                console.log("fail.\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Ownable: caller is not the owner"));}
             assert.equal(await second.token(), token.address);
 
             try {
                 await second.setToken(team, {from: accounts[9]});
-                console.log("fail.\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Ownable: caller is not the owner"));}
             assert.equal(await second.token(), token.address);
         });
@@ -106,13 +106,13 @@ contract('StageSecond', function (accounts) {
 
             try {
                 await second.close({from: tokenOwner});
-                console.log("fail.\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Ownable: caller is not the owner"));}
             assert.equal(+(await token.balanceOf(second.address)), secondStageBalance);
 
             try {
                 await second.close({from: accounts[9]});
-                console.log("fail.\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Ownable: caller is not the owner"));}
             assert.equal(+(await token.balanceOf(second.address)), secondStageBalance);
         });
@@ -120,7 +120,7 @@ contract('StageSecond', function (accounts) {
         it('close investments (before end)', async () => {
             try {
                 await second.close({from: investOwner});
-                console.log("fail.\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Investing are still ongoin"));}
             assert.equal(+(await token.balanceOf(second.address)), secondStageBalance);
         });
@@ -133,7 +133,7 @@ contract('StageSecond', function (accounts) {
 
             try {
                 await web3.eth.sendTransaction({from: accounts[2], to: second.address, gas: 150000, value: vs(1)});
-                console.log("fail.\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Investing time is up"));}
 
             bal2 = await web3.eth.getBalance(accounts[2]);
@@ -151,7 +151,7 @@ contract('StageSecond', function (accounts) {
 
             try {
                 await web3.eth.sendTransaction({from: accounts[2], to: second.address, gas: 150000, value: 0});
-                console.log("fail.\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Value must be greater than 0"));}
 
             bal2 = await web3.eth.getBalance(accounts[2]);
@@ -180,15 +180,6 @@ contract('StageSecond', function (accounts) {
             assert.equal(await second.investors(0), accounts[2]);
             assert.equal(+(await second.totalInvested()), 100);
         });
-        
-        // it('try to send eth through invest function', async () => {
-        //     await second.invest({from: accounts[2], value: 1});
-        //     await second.invest({from: accounts[2], value: 1});
-            
-        //     assert.equal(+(await second.investments(accounts[2])), 2);
-        //     assert.equal(await second.investors(0), accounts[2]);
-        //     assert.equal(+(await second.totalInvested()), 2);
-        // });
 
         it('normal close investing (and overcap check)', async () => {
             assert.equal(+(await token.balanceOf(second.address)), secondStageBalance);
@@ -202,7 +193,7 @@ contract('StageSecond', function (accounts) {
 
             try {
                 await web3.eth.sendTransaction({from: accounts[7], to: second.address, gas: 150000, value: vs(10)});
-                console.log("fail.\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Cap already reached"));}
             bal2 = await web3.eth.getBalance(accounts[7]);
             assert(0 < bal2 - bal1 < 0.1 * decimals);
