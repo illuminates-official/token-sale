@@ -43,12 +43,12 @@ contract StageFirst is Ownable {
     }
 
     modifier timeOut() {
-        require(now >= deployTime.add(firstDuration).add(secondDuration), "Investing are still ongoing");
+        require(now >= deployTime.add(firstDuration.add(secondDuration)), "Investing are still ongoing");
         _;
     }
 
     modifier inTime() {
-        require(now < deployTime.add(firstDuration).add(secondDuration), "Investing time is up");
+        require(now < deployTime.add(firstDuration.add(secondDuration)), "Investing time is up");
         _;
     }
 
@@ -92,7 +92,7 @@ contract StageFirst is Ownable {
             sendTokens();
             receiveEther();
         }
-        else if(now < deployTime.add(firstDuration).add(secondDuration)) {
+        else if(now < deployTime.add(firstDuration.add(secondDuration))) {
             revert("Investing are still ongoing");
         }
         else {

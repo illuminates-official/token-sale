@@ -88,7 +88,7 @@ contract('StageSecond', function (accounts) {
 
             try {
                 await second.close({from: investOwner});
-                console.log("Fail!\n Exception must be thrown before");
+                throw "Fail!\n Exception must be thrown before";
             } catch (error) {assert(error.message.includes("Tokens out"));}
 
             assert.equal(+(await token.balanceOf(second.address)), 0);
